@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<style>
+			.error {
+				color: red
+			}
+		</style>
+	</head>
+	<body>
+		<form>
+			Field 1 <br>
+			<input type="text" data-bind="value: field1" /><br>
+			Field 2 <br>
+			<input type="text" data-bind="value: field2" /><br>
+			Field 3 <br>
+			<input type="text" data-bind="value: field3" /><br>
+			<input type="hidden" data-bind="value: allFields" />
+		</form>
+
+		<script src="lib/knockout-latest.debug.js"></script>
+		<script src="lib/knockout.validation.js"></script>
+		<script type="text/javascript">
+			ko.validation.configure({
+			    insertMessages: true,
+			    decorateElement: true,
+			    errorElementClass: 'error'
+			});
+
+			function MultipleFieldValidation() {
+				var self = this;
+
+				self.field1 = ko.observable('');
+				self.field2 = ko.observable('');
+				self.field3 = ko.observable('');
+				
+				self.allFields = ko.computed(function() {
+        			return self.field1() + self.field2() + self.field3();
+    			}, self).extend({required: {value: true, message: 'All fields are required'}});
+
+				self.errors = ko.validation.group(self);
+				self.errors.showAllMessages();
+			}
+			
+			ko.applyBindings(new MultipleFieldValidation());
+		</script>
+	</body>
+</html>
