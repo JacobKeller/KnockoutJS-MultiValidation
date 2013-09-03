@@ -8,13 +8,20 @@
 	</head>
 	<body>
 		<form>
-			Field 1 <br>
-			<input type="text" data-bind="value: field1" /><br>
-			Field 2 <br>
-			<input type="text" data-bind="value: field2" /><br>
-			Field 3 <br>
-			<input type="text" data-bind="value: field3" /><br>
+			<br>
+			<select data-bind="options: availableYears, selectedOptions: BirthYearSelected" id="year">
+			</select>
+			<br>
+			<select data-bind="options: availableMonths, selectedOptions: BirthMonthSelected" id="month" >
+			</select>
+			<br>
+			<select data-bind="options: availableDays, selectedOptions: BirthDaySelected" id="day">
+			</select>
 			<input type="hidden" data-bind="value: allFields" />
+			<br>
+			<br>
+			<br>
+			<!--<input id ="Submit" type="button" data-bind="click: submit"  value="SEND" />-->
 		</form>
 
 		<script src="lib/knockout-latest.debug.js"></script>
@@ -26,20 +33,67 @@
 			    errorElementClass: 'error'
 			});
 
+			ko.validation.rules['allFieldsValid'] = {
+    			validator: function () {
+    			    var thing1 = document.getElementById("year");
+					var Field1 = thing1.selectedIndex;
+					var thing2 = document.getElementById("month");
+					var Field2 = thing2.selectedIndex;
+					var thing3 = document.getElementById("day");
+					var Field3 = thing3.selectedIndex;
+					var error = 0;
+
+					if (Field1 == "0" || Field2 == "0" || Field3 == "0")
+					{
+						error = 1;
+					}
+        		return error === 0;
+		    },
+			};
+			ko.validation.registerExtenders();
+
 			function MultipleFieldValidation() {
 				var self = this;
 
-				self.field1 = ko.observable('');
-				self.field2 = ko.observable('');
-				self.field3 = ko.observable('');
+				self.availableYears = getAvailableYears();
+				self.availableDays = getAvailableDays();
+				self.availableMonths = getAvailableMonths();
+
+				self.BirthYearSelected = ko.observable('');
+				self.BirthMonthSelected = ko.observable('');
+				self.BirthDaySelected = ko.observable('');
 				
 				self.allFields = ko.computed(function() {
-        			return self.field1() + self.field2() + self.field3();
-    			}, self).extend({required: {value: true, message: 'All fields are required'}});
+				    return self.BirthYearSelected().selectedIndex + self.BirthMonthSelected().selectedIndex + self.BirthDaySelected().selectedIndex;
+    			}, self).extend({allFieldsValid: {value: self, message: 'All fields are required'}});
 
 				self.errors = ko.validation.group(self);
 				self.errors.showAllMessages();
-			}
+				}
+				function getAvailableYears() {
+				    var years = [];
+				    years.push("Year");
+
+				    for (var i = 2012; i >= 1900; --i) {
+				        years.push(i);
+				    }
+				    return years;
+				}
+
+				function getAvailableMonths() {
+				    var months = ["Month", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+				    return months;
+				}
+
+				function getAvailableDays() {
+				    var days = [];
+				    days.push("Day");
+				    for (var i = 1; i <= 31; ++i) {
+				        days.push(i);
+				    }
+				    return days;
+				}
+			
 			
 			ko.applyBindings(new MultipleFieldValidation());
 		</script>
